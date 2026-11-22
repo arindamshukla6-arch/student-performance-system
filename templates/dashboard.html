@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Early Warning{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Dashboard</h1>
+    <p>A snapshot of the students currently in the system and where support may be needed.</p>
+  </div>
+  <div class="page-actions">
+    <a class="btn btn-primary" href="{{ url_for('add_student') }}">{% from "_icons.html" import icon %}{{ icon('plus', 18) }} Add student</a>
+    <a class="btn btn-ghost" href="{{ url_for('predict') }}">Quick prediction</a>
+  </div>
+</div>
+
+{% if stats.total == 0 %}
+<div class="card empty">
+  <h3>No students yet</h3>
+  <p>Add your first student to see the dashboard fill up.{% if not model_ok %} The model must be trained first with <code>python train_model.py</code>.{% endif %}</p>
+  <a class="btn btn-primary" href="{{ url_for('add_student') }}">Add student</a>
+</div>
+{% else %}
+
+<div class="card ribbon-card">
+  <h2>{{ stats.counts['High Risk'] + stats.counts['Moderate Risk'] }} of {{ stats.total }} students may need support</h2>
+  <p>{{ stats.counts['High Risk'] }} high risk and {{ stats.counts['Moderate Risk'] }} moderate risk. {{ stats.below_75 }} students have attendance below 75%.</p>
+  <div class="ribbon" role="img" aria-label="Share of students by risk level">
+    <span class="r-low" style="width: {{ stats.percent['Low Risk'] }}%"></span>
+    <span class="r-moderate" style="width: {{ stats.percent['Moderate Risk'] }}%"></span>
+    <span class="r-high" style="width: {{ stats.percent['High Risk'] }}%"></span>
+  </div>
+  <div class="ribbon-legend">
+    <span><i class="dot low"></i>Low risk <b>{{ stats.percent['Low Risk'] }}%</b></span>
+    <span><i class="dot moderate"></i>Moderate risk <b>{{ stats.percent['Moderate Risk'] }}%</b></span>
+    <span><i class="dot high"></i>High risk <b>{{ stats.percent['High Risk'] }}%</b></span>
+  </div>
+</div>
+
+<div class="grid grid-4 mt">
+  <a class="card kpi" href="{{ url_for('students') }}" style="text-decoration:none;color:inherit">
+    <div class="label">Total students</div><div class="value num">{{ stats.total }}</div><div class="sub">View all records</div>
+  </a>
+  <a class="card kpi low" href="{{ url_for('students', risk='Low Risk') }}" style="text-decoration:none;color:inherit">
+    <div class="label">Low risk students</div><div class="value num">{{ stats.counts['Low Risk'] }}</div><div class="sub">Keep the routine going</div>
+  </a>
+  <a class="card kpi moderate" href="{{ url_for('students', risk='Moderate Risk') }}" style="text-decoration:none;color:inherit">
+    <div class="label">Moderate risk students</div><div class="value num">{{ stats.counts['Moderate Risk'] }}</div><div class="sub">Early support helps most</div>
+  </a>
+  <a class="card kpi high" href="{{ url_for('students', risk='High Risk') }}" style="text-decoration:none;color:inherit">
+    <div class="label">High risk students</div><div class="value num">{{ stats.counts['High Risk'] }}</div><div class="sub">Mentor discussion advised</div>
+  </a>
+</div>
+
+<div class="grid grid-main mt">
+  <div class="card">
+    <div class="card-head"><h2>Attendance overview</h2><p>Students per attendance band, split by risk</p></div>
+    <div class="chart-box"><canvas id="attendanceChart" aria-label="Attendance bands by risk level" role="img"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-head"><h2>Overall academic overview</h2><p>Class averages</p></div>
+    <dl class="kv" style="gap:.9rem 1rem">
+      <dt>Average attendance</dt><dd class="num">{{ stats.avg_attendance }}%</dd>
+      <dt>Average internal marks</dt><dd class="num">{{ stats.avg_internal }}%</dd>
+      <dt>Average previous performance</dt><dd class="num">{{ stats.avg_previous }}%</dd>
+      <dt>Assignments completed</dt><dd class="num">{{ stats.assignment_completion }}% of students</dd>
+    </dl>
+  </div>
+</div>
+
+<div class="grid grid-main mt">
+  <div class="card">
+    <div class="card-head"><h2>Performance analytics</h2><p>Average scores by risk group (%)</p></div>
+    <div class="chart-box"><canvas id="performanceChart" aria-label="Average scores by risk group" role="img"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-head"><h2>Recent predictions</h2><a class="small" href="{{ url_for('students') }}">All records</a></div>
+    <div class="stack" style="gap:.55rem">
+      {% for s in recent %}
+      <a href="{{ url_for('student_detail', student_id=s.student_id) }}" style="display:flex;justify-content:space-between;align-items:center;gap:.6rem;text-decoration:none;color:inherit;padding:.35rem 0;border-bottom:1px solid var(--line)">
+        <span><strong>{{ s.student_id }}</strong><br><span class="muted small">{{ s.created_at }}</span></span>
+        <span class="pill {{ s.risk_level | risk_slug }}">{{ s.risk_level }}</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if stats.total > 0 %}
+<script src="{{ url_for('static', filename='js/vendor/chart.umd.js') }}"></script>
+<script>
+  const stats = {{ stats | tojson }};
+  const C = window.RISK_COLORS;
+
+  new Chart(document.getElementById('attendanceChart'), {
+    type: 'bar',
+    data: {
+      labels: Object.keys(stats.attendance_bands),
+      datasets: ['Low Risk', 'Moderate Risk', 'High Risk'].map(label => ({
+        label, backgroundColor: C[label], borderRadius: 4,
+        data: Object.values(stats.attendance_bands).map(b => b[label])
+      }))
+    },
+    options: window.chartOptions({ stacked: true, yTitle: 'Students' })
+  });
+
+  new Chart(document.getElementById('performanceChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Low Risk', 'Moderate Risk', 'High Risk'],
+      datasets: [
+        { label: 'Attendance', backgroundColor: '#0a1f44', borderRadius: 4, data: ['Low Risk', 'Moderate Risk', 'High Risk'].map(k => stats.by_risk[k].attendance) },
+        { label: 'Internal marks', backgroundColor: '#3d78ef', borderRadius: 4, data: ['Low Risk', 'Moderate Risk', 'High Risk'].map(k => stats.by_risk[k].internal) },
+        { label: 'Previous performance', backgroundColor: '#9bb8f5', borderRadius: 4, data: ['Low Risk', 'Moderate Risk', 'High Risk'].map(k => stats.by_risk[k].previous) }
+      ]
+    },
+    options: window.chartOptions({ yTitle: 'Average (%)', max: 100 })
+  });
+</script>
+{% endif %}
+{% endblock %}

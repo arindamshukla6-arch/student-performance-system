@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Analytics - Early Warning{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Analytics</h1>
+    <p>How risk levels relate to attendance, marks and past results across all saved students. For accuracy and confusion matrix, see <a href="{{ url_for('evaluation') }}">Model evaluation</a>.</p>
+  </div>
+  <div class="page-actions"><a class="btn btn-ghost" href="{{ url_for('report') }}">Open risk report</a></div>
+</div>
+
+{% if stats.total == 0 %}
+<div class="card empty"><h3>No data to chart</h3><p>Add students first and the charts will appear here.</p><a class="btn btn-primary" href="{{ url_for('add_student') }}">Add student</a></div>
+{% else %}
+<div class="grid grid-2">
+  <div class="card">
+    <div class="card-head"><h2>Risk distribution</h2><p>{{ stats.total }} students</p></div>
+    <div class="chart-box"><canvas id="pieChart" role="img" aria-label="Risk distribution pie chart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-head"><h2>Attendance vs performance</h2><p>Average % by risk group</p></div>
+    <div class="chart-box"><canvas id="avpChart" role="img" aria-label="Average attendance and performance by risk group"></canvas></div>
+  </div>
+</div>
+<div class="grid grid-2 mt">
+  <div class="card">
+    <div class="card-head"><h2>Student performance overview</h2><p>Students per internal-marks band, split by risk</p></div>
+    <div class="chart-box"><canvas id="marksChart" role="img" aria-label="Internal marks bands by risk level"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-head"><h2>Model comparison</h2><p>Test-set scores of the three algorithms</p></div>
+    {% if metrics %}
+    <div class="chart-box"><canvas id="modelChart" role="img" aria-label="Model comparison chart"></canvas></div>
+    {% else %}
+    <div class="empty"><p>Model results are not available yet. Run <code>python train_model.py</code>.</p></div>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if stats.total > 0 %}
+<script src="{{ url_for('static', filename='js/vendor/chart.umd.js') }}"></script>
+<script>
+  const stats = {{ stats | tojson }};
+  const metrics = {{ metrics | tojson }};
+  const C = window.RISK_COLORS;
+  const levels = ['Low Risk', 'Moderate Risk', 'High Risk'];
+
+  new Chart(document.getElementById('pieChart'), {
+    type: 'pie',
+    data: { labels: levels, datasets: [{ data: levels.map(l => stats.counts[l]), backgroundColor: levels.map(l => C[l]), borderColor: '#fff', borderWidth: 3 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+  });
+
+  new Chart(document.getElementById('avpChart'), {
+    type: 'bar',
+    data: {
+      labels: levels,
+      datasets: [
+        { label: 'Attendance', backgroundColor: '#0a1f44', borderRadius: 4, data: levels.map(l => stats.by_risk[l].attendance) },
+        { label: 'Internal marks', backgroundColor: '#3d78ef', borderRadius: 4, data: levels.map(l => stats.by_risk[l].internal) },
+        { label: 'Previous performance', backgroundColor: '#9bb8f5', borderRadius: 4, data: levels.map(l => stats.by_risk[l].previous) }
+      ]
+    },
+    options: window.chartOptions({ yTitle: 'Average (%)', max: 100 })
+  });
+
+  new Chart(document.getElementById('marksChart'), {
+    type: 'bar',
+    data: {
+      labels: Object.keys(stats.marks_bands),
+      datasets: levels.map(label => ({ label, backgroundColor: C[label], borderRadius: 4, data: Object.values(stats.marks_bands).map(b => b[label]) }))
+    },
+    options: window.chartOptions({ stacked: true, yTitle: 'Students' })
+  });
+
+  if (metrics) {
+    const names = Object.keys(metrics.models);
+    const pick = key => names.map(n => +(metrics.models[n][key] * 100).toFixed(1));
+    new Chart(document.getElementById('modelChart'), {
+      type: 'bar',
+      data: {
+        labels: names,
+        datasets: [
+          { label: 'Accuracy', backgroundColor: '#0a1f44', borderRadius: 4, data: pick('accuracy') },
+          { label: 'Precision', backgroundColor: '#2a62d9', borderRadius: 4, data: pick('precision_macro') },
+          { label: 'Recall', backgroundColor: '#6f9af0', borderRadius: 4, data: pick('recall_macro') },
+          { label: 'F1-score', backgroundColor: '#b5caf7', borderRadius: 4, data: pick('f1_macro') }
+        ]
+      },
+      options: window.chartOptions({ yTitle: 'Score (%)', max: 100 })
+    });
+  }
+</script>
+{% endif %}
+{% endblock %}

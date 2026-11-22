@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Add student - Early Warning{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Add student</h1>
+    <p>Save a student record and get a risk screening straight away. The name is for display only and is never used by the model.</p>
+  </div>
+</div>
+
+<form class="card form-card" method="post" action="{{ url_for('add_student') }}" novalidate data-validate>
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <div class="row">
+    <div class="field {% if errors.student_id %}has-error{% endif %}">
+      <label for="student_id">Student ID</label>
+      <input id="student_id" name="student_id" type="text" maxlength="20" required autocomplete="off"
+             value="{{ form.get('student_id', '') }}">
+      <div class="hint">3-20 characters: letters, digits, - or _.</div>
+      {% if errors.student_id %}<div class="error-text" role="alert">{{ errors.student_id }}</div>{% endif %}
+    </div>
+    <div class="field {% if errors.student_name %}has-error{% endif %}">
+      <label for="student_name">Student name (optional)</label>
+      <input id="student_name" name="student_name" type="text" maxlength="60" autocomplete="off"
+             value="{{ form.get('student_name', '') }}" placeholder="Display only">
+      {% if errors.student_name %}<div class="error-text" role="alert">{{ errors.student_name }}</div>{% endif %}
+    </div>
+  </div>
+
+  {% include "_student_fields.html" %}
+
+  <div class="disclaimer warn">Use fictional or anonymised records while this prototype is in demo mode. It has no real access control.</div>
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit">Save and predict risk</button>
+    <a class="btn btn-ghost" href="{{ url_for('students') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

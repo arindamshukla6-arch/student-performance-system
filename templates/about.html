@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}About project - Early Warning{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>About this project</h1>
+    <p>AI-Based Student Performance Prediction and Early Warning System, a B.Tech mini project prototype.</p>
+  </div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <h2>What it does</h2>
+    <p>Mentors enter four academic inputs for a student: attendance, internal assessment marks, assignment status and previous academic performance. A machine learning model screens the student as Low, Moderate or High risk and suggests support actions.</p>
+    <p class="muted">The goal is to notice students who may need help early, while there is still time to act.</p>
+  </div>
+  <div class="card">
+    <h2>How it works</h2>
+    <ol class="actions">
+      <li>A synthetic dataset is generated and cleaned.</li>
+      <li>Missing values are filled in and categories are encoded in a scikit-learn pipeline.</li>
+      <li>Logistic Regression, Decision Tree and Random Forest are trained and compared.</li>
+      <li>The model with the best cross-validated macro F1 is saved with Joblib.</li>
+      <li>Flask loads that model and predicts for each form submission.</li>
+    </ol>
+  </div>
+</div>
+
+<div class="grid grid-2 mt">
+  <div class="card">
+    <h2>Technology</h2>
+    <dl class="kv">
+      <dt>Backend</dt><dd>Python, Flask</dd>
+      <dt>Machine learning</dt><dd>scikit-learn, pandas, NumPy</dd>
+      <dt>Database</dt><dd>SQLite</dd>
+      <dt>Frontend</dt><dd>HTML, CSS, JavaScript, Chart.js</dd>
+    </dl>
+  </div>
+  <div class="card">
+    <h2>Limitations of this prototype</h2>
+    <ul class="actions">
+      <li>All data is synthetic. No real student records are included.</li>
+      <li>Model scores describe the synthetic data only, not real-world accuracy.</li>
+      <li>Only four inputs are used. Many real factors are not captured.</li>
+      <li>The login is one shared demo account, with no roles or audit trail.</li>
+      <li>It is not ready for institutional use. Real deployment would need consent, privacy review, proper authentication and testing for bias.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="disclaimer warn mt" role="note"><strong>Human review required.</strong> A prediction is a screening indication, not a judgement about a student. Decisions should always be made by teachers and mentors who know the student.</div>
+{% endblock %}

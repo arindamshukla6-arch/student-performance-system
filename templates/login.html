@@ -1,0 +1,67 @@
+{% from "_icons.html" import icon %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in - Student Performance Early Warning</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="login-page">
+  <section class="login-aside">
+    <div>
+      <div class="brand" style="padding-left:0">
+        <span class="brand-mark">{{ icon('shield', 20) }}</span>
+        <span class="brand-name">Early Warning<small>Student performance</small></span>
+      </div>
+      <h1>See who needs support before the exam does.</h1>
+      <p>Enter attendance, internal marks, assignment status and past results. The system screens each student as low, moderate or high risk so mentors can step in early.</p>
+      <div class="ribbon" aria-hidden="true"><span class="r-low" style="width:46%"></span><span class="r-moderate" style="width:32%"></span><span class="r-high" style="width:22%"></span></div>
+      <div class="ribbon-legend">
+        <span><i class="dot low"></i>Low risk</span>
+        <span><i class="dot moderate"></i>Moderate risk</span>
+        <span><i class="dot high"></i>High risk</span>
+      </div>
+    </div>
+    <p class="small hide-sm" style="margin:0">For teachers, mentors and authorised academic staff. Mini project prototype.</p>
+  </section>
+
+  <section class="login-main">
+    <div class="login-box">
+      <h2>Sign in</h2>
+      <p class="muted">Use your academic staff account to continue.</p>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}<div class="flash {{ category }}" style="margin-bottom:1rem">{{ message }}</div>{% endfor %}
+      {% endwith %}
+      {% if error %}<div class="flash error" role="alert" style="margin-bottom:1rem">{{ error }}</div>{% endif %}
+
+      <form method="post" action="{{ url_for('login', next=request.args.get('next')) if request.args.get('next') else url_for('login') }}" novalidate>
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <div class="field">
+          <label for="username">Email or username</label>
+          <input id="username" name="username" type="text" autocomplete="username" required autofocus value="{{ request.form.get('username', '') }}">
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" required>
+        </div>
+        <button class="btn btn-primary btn-block" type="submit">Sign in</button>
+      </form>
+
+      <div class="demo-box">
+        <strong>Demo account</strong>
+        <div>Email: <code>{{ demo_username }}</code></div>
+        <div>Password: <code>{{ demo_password }}</code></div>
+        <p class="muted small" style="margin:.5rem 0 0">This is a single shared demo login for the prototype. It is not a real user system and should not be used with real student data.</p>
+      </div>
+    </div>
+  </section>
+</div>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

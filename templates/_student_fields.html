@@ -1,0 +1,52 @@
+{# The four academic inputs. Shared by "Add student" and "Predict performance". #}
+<div class="field {% if errors.attendance %}has-error{% endif %}">
+  <label for="attendance">Attendance percentage</label>
+  <input id="attendance" name="attendance" type="number" inputmode="decimal" step="0.1" min="0" max="100" required
+         value="{{ form.get('attendance', '') }}" placeholder="e.g. 78.5" aria-describedby="attendance-hint">
+  <div class="hint" id="attendance-hint">Between 0 and 100.</div>
+  {% if errors.attendance %}<div class="error-text" role="alert">{{ errors.attendance }}</div>{% endif %}
+</div>
+
+<div class="field {% if errors.internal_obtained or errors.internal_max %}has-error{% endif %}">
+  <span class="label" id="internal-label">Internal assessment marks</span>
+  <div class="input-group" role="group" aria-labelledby="internal-label">
+    <input id="internal_obtained" name="internal_obtained" type="number" inputmode="decimal" step="0.01" min="0" required
+           value="{{ form.get('internal_obtained', '') }}" placeholder="Marks obtained" aria-label="Marks obtained">
+    <span class="sep">out of</span>
+    <input id="internal_max" name="internal_max" type="number" inputmode="decimal" step="0.01" min="1" max="1000" required
+           value="{{ form.get('internal_max', '50') }}" placeholder="Maximum" aria-label="Maximum marks">
+  </div>
+  <div class="hint">Set the maximum to match your internal assessment (for example 20, 30 or 50).</div>
+  <div class="preview" id="internal-preview" aria-live="polite"></div>
+  {% if errors.internal_obtained %}<div class="error-text" role="alert">{{ errors.internal_obtained }}</div>{% endif %}
+  {% if errors.internal_max %}<div class="error-text" role="alert">{{ errors.internal_max }}</div>{% endif %}
+</div>
+
+<div class="field {% if errors.assignment_status %}has-error{% endif %}">
+  <span class="label" id="assign-label">Assignment status</span>
+  <div class="radio-cards" role="radiogroup" aria-labelledby="assign-label">
+    {% for option in ASSIGNMENT_OPTIONS %}
+    <label>
+      <input type="radio" name="assignment_status" value="{{ option }}" required {% if form.get('assignment_status') == option %}checked{% endif %}>
+      <span>{{ option }}</span>
+    </label>
+    {% endfor %}
+  </div>
+  {% if errors.assignment_status %}<div class="error-text" role="alert">{{ errors.assignment_status }}</div>{% endif %}
+</div>
+
+<div class="field {% if errors.previous_value or errors.previous_scale %}has-error{% endif %}">
+  <span class="label" id="prev-label">Previous academic performance</span>
+  <div class="row" role="group" aria-labelledby="prev-label">
+    <input id="previous_value" name="previous_value" type="number" inputmode="decimal" step="0.01" min="0" required
+           value="{{ form.get('previous_value', '') }}" placeholder="e.g. 68 or 7.2" aria-label="Previous performance value">
+    <select id="previous_scale" name="previous_scale" aria-label="Scale of previous performance">
+      <option value="percentage" {% if form.get('previous_scale', 'percentage') == 'percentage' %}selected{% endif %}>Percentage (0-100)</option>
+      <option value="cgpa" {% if form.get('previous_scale') == 'cgpa' %}selected{% endif %}>CGPA (0-10)</option>
+    </select>
+  </div>
+  <div class="hint">Use the last completed semester or exam. CGPA is converted to a percentage as CGPA &times; 10, which is only an approximation.</div>
+  <div class="preview" id="previous-preview" aria-live="polite"></div>
+  {% if errors.previous_value %}<div class="error-text" role="alert">{{ errors.previous_value }}</div>{% endif %}
+  {% if errors.previous_scale %}<div class="error-text" role="alert">{{ errors.previous_scale }}</div>{% endif %}
+</div>

@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Risk report - Early Warning{% endblock %}
+{% block content %}
+<div class="page-head no-print">
+  <div>
+    <h1>Academic risk report</h1>
+    <p>A printable summary. Use the button to print it or save it as a PDF from your browser.</p>
+  </div>
+  <div class="page-actions">
+    <button class="btn btn-primary" type="button" data-print>{{ icon('printer', 18) }} Print or save as PDF</button>
+    <a class="btn btn-ghost" href="{{ url_for('export_csv') }}">{{ icon('download', 18) }} Download CSV</a>
+  </div>
+</div>
+
+<article class="report-sheet">
+  <h1 style="margin-bottom:.2rem">Academic Risk Screening Report</h1>
+  <p class="muted">Generated {{ now.strftime('%d %b %Y, %H:%M') }} by {{ current_user }}</p>
+  <div class="disclaimer warn">Screening indications only, produced by a model trained on synthetic data. Every result needs review by a teacher or mentor before any action is taken.</div>
+
+  <h2>Summary</h2>
+  <div class="table-wrap" style="box-shadow:none">
+    <table>
+      <thead><tr><th>Risk level</th><th class="num">Students</th><th class="num">Share</th><th class="num">Avg attendance</th><th class="num">Avg internal marks</th><th class="num">Avg previous</th></tr></thead>
+      <tbody>
+        {% for label in RISK_LABELS %}
+        <tr>
+          <td><span class="pill {{ label | risk_slug }}">{{ label }}</span></td>
+          <td class="num">{{ stats.counts[label] }}</td>
+          <td class="num">{{ stats.percent[label] }}%</td>
+          <td class="num">{{ stats.by_risk[label].attendance }}%</td>
+          <td class="num">{{ stats.by_risk[label].internal }}%</td>
+          <td class="num">{{ stats.by_risk[label].previous }}%</td>
+        </tr>
+        {% endfor %}
+        <tr><td><strong>All students</strong></td><td class="num"><strong>{{ stats.total }}</strong></td><td class="num">100%</td><td class="num">{{ stats.avg_attendance }}%</td><td class="num">{{ stats.avg_internal }}%</td><td class="num">{{ stats.avg_previous }}%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="small muted" style="margin-top:.6rem">{{ stats.below_75 }} students have attendance below 75%. {{ stats.assignment_completion }}% of students have completed their assignments.</p>
+
+  {% for label in ['High Risk', 'Moderate Risk'] %}
+  <h2>{{ label }} students ({{ by_level[label]|length }})</h2>
+  {% if by_level[label] %}
+  <div class="table-wrap" style="box-shadow:none">
+    <table>
+      <thead><tr><th>ID</th><th>Name</th><th class="num">Attendance</th><th class="num">Internal marks</th><th>Assignments</th><th class="num">Previous</th><th class="num">Confidence</th></tr></thead>
+      <tbody>
+        {% for s in by_level[label] %}
+        <tr>
+          <td>{{ s.student_id }}</td><td>{{ s.name or '-' }}</td>
+          <td class="num">{{ '%g' % s.attendance }}%</td>
+          <td class="num">{{ '%g' % s.internal_marks_pct }}%</td>
+          <td>{{ s.assignment_status }}</td>
+          <td class="num">{{ '%g' % s.previous_performance_pct }}%</td>
+          <td class="num">{% if s.confidence is not none %}{{ '%.1f' % s.confidence }}%{% else %}-{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}<p class="muted">No students in this group.</p>{% endif %}
+  {% endfor %}
+
+  <h2>Suggested support actions</h2>
+  <p><strong>High risk:</strong> arrange a teacher-mentor discussion, identify attendance and learning difficulties, prepare a structured improvement plan and provide additional academic support.</p>
+  <p><strong>Moderate risk:</strong> improve attendance, focus on weaker subjects, complete pending assignments and consult the subject teacher.</p>
+
+  {% if metrics %}
+  <h2>About the model</h2>
+  <p class="small">{{ metrics.selected_model }} was selected, with test accuracy {{ '%.1f' % (metrics.models[metrics.selected_model].accuracy * 100) }}% on {{ metrics.dataset.test_rows }} synthetic test records (trained {{ metrics.trained_at }}). This does not measure accuracy on real students.</p>
+  {% endif %}
+</article>
+{% endblock %}

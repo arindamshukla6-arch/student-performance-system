@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Student records - Early Warning{% endblock %}
+
+{% macro sort_th(key, label, numeric=False) -%}
+  {% set next_dir = 'asc' if (sort == key and direction == 'desc') else 'desc' if sort == key else 'asc' %}
+  <th class="{{ 'num' if numeric }}" aria-sort="{{ ('ascending' if direction == 'asc' else 'descending') if sort == key else 'none' }}">
+    <a href="{{ url_for('students', q=q or None, risk=risk or None, sort=key, dir=next_dir) }}">{{ label }}
+      {% if sort == key %}<span aria-hidden="true">{{ '&uarr;'|safe if direction == 'asc' else '&darr;'|safe }}</span>{% endif %}</a>
+  </th>
+{%- endmacro %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Student records</h1>
+    <p>{{ rows|length }} of {{ total }} records shown. Names are for display only. Demo records are synthetic.</p>
+  </div>
+  <div class="page-actions">
+    <a class="btn btn-ghost" href="{{ url_for('export_csv') }}">{{ icon('download', 18) }} Download CSV</a>
+    <a class="btn btn-primary" href="{{ url_for('add_student') }}">{{ icon('plus', 18) }} Add student</a>
+  </div>
+</div>
+
+<form class="toolbar" method="get" action="{{ url_for('students') }}" role="search">
+  <div class="field grow">
+    <label for="q">Search by ID or name</label>
+    <input id="q" name="q" type="search" value="{{ q }}" placeholder="e.g. DEMO012">
+  </div>
+  <div class="field">
+    <label for="risk">Risk level</label>
+    <select id="risk" name="risk">
+      <option value="">All levels</option>
+      {% for label in RISK_LABELS %}<option value="{{ label }}" {% if risk == label %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="sort">Sort by</label>
+    <select id="sort" name="sort">
+      {% for key, label in [('added','Date added'),('student_id','Student ID'),('name','Name'),('attendance','Attendance'),('internal','Internal marks'),('assignment','Assignments'),('previous','Previous performance'),('risk','Risk level')] %}
+      <option value="{{ key }}" {% if sort == key %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="dir">Order</label>
+    <select id="dir" name="dir">
+      <option value="desc" {% if direction != 'asc' %}selected{% endif %}>High to low / newest</option>
+      <option value="asc" {% if direction == 'asc' %}selected{% endif %}>Low to high / oldest</option>
+    </select>
+  </div>
+  <button class="btn btn-primary" type="submit">Apply</button>
+  {% if q or risk or sort != 'added' or direction != 'desc' %}<a class="btn btn-ghost" href="{{ url_for('students') }}">Reset</a>{% endif %}
+</form>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        {{ sort_th('student_id', 'Student ID') }}
+        {{ sort_th('name', 'Name') }}
+        {{ sort_th('attendance', 'Attendance', True) }}
+        {{ sort_th('internal', 'Internal marks', True) }}
+        {{ sort_th('assignment', 'Assignments') }}
+        {{ sort_th('previous', 'Previous', True) }}
+        {{ sort_th('risk', 'Predicted risk') }}
+        <th><span class="sr-only">Actions</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in rows %}
+      <tr>
+        <td><a href="{{ url_for('student_detail', student_id=s.student_id) }}"><strong>{{ s.student_id }}</strong></a>{% if s.is_demo %}<span class="tag-demo">demo</span>{% endif %}</td>
+        <td>{{ s.name or '-' }}</td>
+        <td class="num">{{ '%g' % s.attendance }}%</td>
+        <td class="num">{{ '%g' % s.internal_obtained }}/{{ '%g' % s.internal_max }} <span class="muted">({{ '%g' % s.internal_marks_pct }}%)</span></td>
+        <td>{{ s.assignment_status }}</td>
+        <td class="num">{{ '%g' % s.previous_performance_pct }}%</td>
+        <td><span class="pill {{ s.risk_level | risk_slug }}">{{ s.risk_level }}</span></td>
+        <td><a class="btn btn-ghost btn-sm" href="{{ url_for('student_detail', student_id=s.student_id) }}">Details</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="8">
+        <div class="empty">
+          <h3>No matching records</h3>
+          <p>{% if q or risk %}Try a different search or clear the filters.{% else %}Add a student to get started.{% endif %}</p>
+          {% if q or risk %}<a class="btn btn-ghost" href="{{ url_for('students') }}">Clear filters</a>{% else %}<a class="btn btn-primary" href="{{ url_for('add_student') }}">Add student</a>{% endif %}
+        </div>
+      </td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

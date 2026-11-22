@@ -1,0 +1,77 @@
+{% from "_icons.html" import icon %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Student Performance Early Warning{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+{% if current_user %}
+<div class="shell">
+  <aside class="sidebar" id="sidebar" aria-label="Main navigation">
+    <a class="brand" href="{{ url_for('dashboard') }}">
+      <span class="brand-mark">{{ icon('shield', 20) }}</span>
+      <span class="brand-name">Early Warning<small>Student performance</small></span>
+    </a>
+    {% set ep = request.endpoint %}
+    <nav class="nav">
+      <a href="{{ url_for('dashboard') }}" {% if ep == 'dashboard' %}aria-current="page"{% endif %}>{{ icon('dashboard') }} Dashboard</a>
+      <a href="{{ url_for('add_student') }}" {% if ep == 'add_student' %}aria-current="page"{% endif %}>{{ icon('user-plus') }} Add student</a>
+      <a href="{{ url_for('predict') }}" {% if ep == 'predict' %}aria-current="page"{% endif %}>{{ icon('spark') }} Predict performance</a>
+      <a href="{{ url_for('students') }}" {% if ep in ('students', 'student_detail') %}aria-current="page"{% endif %}>{{ icon('users') }} Student records</a>
+      <div class="nav-group">Insights</div>
+      <a href="{{ url_for('analytics') }}" {% if ep == 'analytics' %}aria-current="page"{% endif %}>{{ icon('chart') }} Analytics</a>
+      <a href="{{ url_for('evaluation') }}" {% if ep == 'evaluation' %}aria-current="page"{% endif %}>{{ icon('shield') }} Model evaluation</a>
+      <a href="{{ url_for('report') }}" {% if ep == 'report' %}aria-current="page"{% endif %}>{{ icon('file') }} Risk report</a>
+      <a href="{{ url_for('about') }}" {% if ep == 'about' %}aria-current="page"{% endif %}>{{ icon('info') }} About project</a>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="muted">Signed in as</div>
+      <div class="who">{{ current_user }}</div>
+      <form method="post" action="{{ url_for('logout') }}" style="margin-top:.4rem">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <button class="link-btn" type="submit">Sign out</button>
+      </form>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-btn" id="menu-btn" type="button" aria-label="Open navigation" aria-controls="sidebar" aria-expanded="false">{{ icon('menu') }}</button>
+      <strong style="font-family:var(--font-display)">Early Warning</strong>
+    </header>
+
+    {% if not model_ok %}
+    <div class="banner" role="alert">The prediction model is not available. Open a terminal in the project folder and run <code>python train_model.py</code>, then reload this page.</div>
+    {% endif %}
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="flashes" role="status">
+        {% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}
+      </div>
+      {% endif %}
+    {% endwith %}
+
+    <main class="content">
+      {% block content %}{% endblock %}
+    </main>
+    <footer class="footer-note no-print">
+      Prototype built on synthetic demonstration data. Predictions are screening indications only and need review by a teacher or mentor.
+    </footer>
+  </div>
+</div>
+{% else %}
+<main class="content">
+  {% block public %}{{ self.content() }}{% endblock %}
+</main>
+{% endif %}
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

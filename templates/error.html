@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} - Early Warning{% endblock %}
+{% block content %}
+<div class="error-page">
+  <div>
+    <div class="error-code">{{ code }}</div>
+    <h1>{{ title }}</h1>
+    <p class="muted">{{ message }}</p>
+    <a class="btn btn-primary" href="{{ url_for('home') }}">Go to the dashboard</a>
+  </div>
+</div>
+{% endblock %}

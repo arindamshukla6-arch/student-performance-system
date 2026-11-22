@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}{% if student %}{{ student.student_id }}{% else %}Prediction{% endif %} - Early Warning{% endblock %}
+{% block content %}
+{% set slug = result.label | risk_slug %}
+<div class="page-head">
+  <div>
+    {% if student %}
+      <h1>{{ student.student_id }}{% if student.name %} <span class="muted" style="font-weight:500">{{ student.name }}</span>{% endif %}</h1>
+      <p>Prediction details for this student record, added {{ student.created_at }}.{% if student.is_demo %} This is a synthetic demo record.{% endif %}</p>
+    {% else %}
+      <h1>Prediction result</h1>
+      <p>This quick check was not saved.</p>
+    {% endif %}
+  </div>
+  <div class="page-actions">
+    {% if student %}
+      <a class="btn btn-ghost" href="{{ url_for('students') }}">Back to records</a>
+      <form method="post" action="{{ url_for('delete_student', student_id=student.student_id) }}" data-confirm="Delete record {{ student.student_id }}? This cannot be undone.">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <button class="btn btn-danger" type="submit">Delete record</button>
+      </form>
+    {% else %}
+      <a class="btn btn-ghost" href="{{ url_for('predict') }}">Check another student</a>
+      <a class="btn btn-primary" href="{{ url_for('add_student') }}">Add a student record</a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card result-hero {{ slug }}">
+  <div>
+    <div class="muted small">Predicted risk category</div>
+    <div class="result-label">{{ result.label }}</div>
+    {% if result.confidence is not none %}
+      <div class="muted small" style="margin-top:.3rem">Model confidence: <strong class="num">{{ '%.1f' % result.confidence }}%</strong></div>
+    {% endif %}
+  </div>
+  {% if result.probabilities %}
+  <div class="meter" aria-label="Probability for each risk category">
+    {% for label, pct in result.probabilities.items() %}
+    <div class="meter-row {% if label == result.label %}top{% endif %}">
+      <span>{{ label }}</span>
+      <div class="meter-track" role="img" aria-label="{{ label }} {{ pct }} percent"><div class="meter-fill {{ label | risk_slug }}" style="width: {{ pct }}%"></div></div>
+      <span class="num" style="text-align:right">{{ '%.1f' % pct }}%</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+
+<div class="grid grid-main mt">
+  <div class="stack">
+    <div class="card">
+      <h2>Why this result</h2>
+      <p class="muted">{{ summary_text }}</p>
+      <ul class="factors">
+        {% for f in factors %}
+        <li>
+          <span class="factor-icon {{ f.level }}" aria-hidden="true">{% if f.level == 'good' %}&#10003;{% elif f.level == 'watch' %}!{% else %}&times;{% endif %}</span>
+          <span><span class="sr-only">{{ f.level }}: </span>{{ f.text }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+      <p class="muted small" style="margin:.9rem 0 0">These notes describe the inputs in plain language using simple rule-of-thumb levels. The model itself combines all four inputs together, so no single note decides the result.</p>
+    </div>
+
+    <div class="card">
+      <h2>Recommended support actions</h2>
+      <ul class="actions">
+        {% for action in actions %}<li>{{ action }}</li>{% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="stack">
+    <div class="card">
+      <h2>Academic input summary</h2>
+      <dl class="kv">
+        <dt>Attendance</dt><dd class="num">{{ '%g' % inputs.attendance }}%</dd>
+        <dt>Internal marks</dt><dd class="num">{{ '%g' % inputs.internal_obtained }} / {{ '%g' % inputs.internal_max }} ({{ '%g' % inputs.internal_marks_pct }}%)</dd>
+        <dt>Assignments</dt><dd>{{ inputs.assignment_status }}</dd>
+        <dt>Previous performance</dt>
+        <dd class="num">{% if inputs.previous_scale == 'cgpa' %}{{ '%g' % inputs.previous_value }} CGPA ({{ '%g' % inputs.previous_performance_pct }}%){% else %}{{ '%g' % inputs.previous_performance_pct }}%{% endif %}</dd>
+      </dl>
+    </div>
+    <div class="disclaimer warn" role="note">
+      <strong>Screening indication only.</strong> This prediction is produced by a model trained on synthetic data. It must be reviewed by a teacher or mentor and must not be used to make decisions about a student on its own.
+    </div>
+  </div>
+</div>
+{% endblock %}

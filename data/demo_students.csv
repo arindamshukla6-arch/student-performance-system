@@ -1,0 +1,61 @@
+student_id,name,attendance,internal_max,internal_obtained,assignment_status,previous_performance_pct
+DEMO001,Demo Student 01,79.1,50,31.6,Completed,64.0
+DEMO002,Demo Student 02,70.7,30,17.0,Partially Completed,68.8
+DEMO003,Demo Student 03,76.4,30,17.3,Completed,59.6
+DEMO004,Demo Student 04,53.2,50,12.8,Completed,49.8
+DEMO005,Demo Student 05,64.8,30,12.5,Completed,56.7
+DEMO006,Demo Student 06,67.5,50,28.8,Completed,48.1
+DEMO007,Demo Student 07,89.8,50,16.4,Completed,65.0
+DEMO008,Demo Student 08,100.0,20,17.3,Completed,85.4
+DEMO009,Demo Student 09,53.4,20,6.6,Partially Completed,56.1
+DEMO010,Demo Student 10,60.6,25,16.6,Completed,54.1
+DEMO011,Demo Student 11,88.4,25,13.7,Completed,71.8
+DEMO012,Demo Student 12,48.1,50,38.2,Completed,69.7
+DEMO013,Demo Student 13,69.6,50,32.4,Partially Completed,65.7
+DEMO014,Demo Student 14,69.3,20,6.3,Completed,49.1
+DEMO015,Demo Student 15,94.7,25,19.8,Completed,63.5
+DEMO016,Demo Student 16,90.2,50,44.4,Partially Completed,75.1
+DEMO017,Demo Student 17,63.6,20,9.6,Partially Completed,42.5
+DEMO018,Demo Student 18,67.9,50,26.9,Partially Completed,56.7
+DEMO019,Demo Student 19,61.6,20,8.3,Partially Completed,33.6
+DEMO020,Demo Student 20,91.6,25,9.0,Completed,43.4
+DEMO021,Demo Student 21,59.3,50,29.8,Completed,34.5
+DEMO022,Demo Student 22,70.1,25,13.0,Partially Completed,60.2
+DEMO023,Demo Student 23,74.2,25,12.3,Completed,43.7
+DEMO024,Demo Student 24,75.7,25,13.4,Partially Completed,68.3
+DEMO025,Demo Student 25,73.9,30,16.4,Partially Completed,66.5
+DEMO026,Demo Student 26,58.2,25,10.6,Not Completed,61.0
+DEMO027,Demo Student 27,61.7,50,27.7,Completed,23.7
+DEMO028,Demo Student 28,66.3,25,13.7,Completed,55.4
+DEMO029,Demo Student 29,93.2,25,18.8,Completed,63.2
+DEMO030,Demo Student 30,86.4,30,19.0,Completed,65.8
+DEMO031,Demo Student 31,67.1,30,11.3,Partially Completed,39.5
+DEMO032,Demo Student 32,83.4,30,15.8,Partially Completed,56.4
+DEMO033,Demo Student 33,65.4,30,13.4,Completed,48.3
+DEMO034,Demo Student 34,87.3,50,27.1,Partially Completed,51.1
+DEMO035,Demo Student 35,81.9,50,33.4,Partially Completed,81.0
+DEMO036,Demo Student 36,80.2,50,25.0,Completed,51.1
+DEMO037,Demo Student 37,56.5,30,12.7,Partially Completed,63.5
+DEMO038,Demo Student 38,86.2,30,17.8,Partially Completed,78.2
+DEMO039,Demo Student 39,47.4,25,19.9,Completed,54.7
+DEMO040,Demo Student 40,44.8,50,25.8,Partially Completed,62.2
+DEMO041,Demo Student 41,72.1,25,12.1,Partially Completed,65.8
+DEMO042,Demo Student 42,62.9,20,13.5,Partially Completed,65.0
+DEMO043,Demo Student 43,71.6,50,35.0,Completed,44.4
+DEMO044,Demo Student 44,100.0,20,8.5,Completed,65.2
+DEMO045,Demo Student 45,71.1,50,36.0,Partially Completed,85.7
+DEMO046,Demo Student 46,58.0,30,11.5,Not Completed,39.2
+DEMO047,Demo Student 47,83.9,20,9.1,Partially Completed,77.8
+DEMO048,Demo Student 48,84.1,20,14.7,Completed,65.9
+DEMO049,Demo Student 49,69.8,25,13.9,Partially Completed,53.7
+DEMO050,Demo Student 50,84.1,20,16.4,Partially Completed,96.0
+DEMO051,Demo Student 51,90.8,20,11.8,Partially Completed,76.2
+DEMO052,Demo Student 52,77.1,30,17.1,Completed,44.8
+DEMO053,Demo Student 53,60.9,50,27.6,Completed,65.2
+DEMO054,Demo Student 54,78.0,25,16.4,Partially Completed,73.2
+DEMO055,Demo Student 55,75.5,50,22.4,Completed,61.0
+DEMO056,Demo Student 56,64.0,50,25.8,Partially Completed,74.9
+DEMO057,Demo Student 57,79.5,50,40.0,Partially Completed,62.9
+DEMO058,Demo Student 58,66.9,30,18.4,Completed,74.7
+DEMO059,Demo Student 59,98.6,25,20.0,Completed,87.0
+DEMO060,Demo Student 60,75.1,30,16.5,Completed,53.2

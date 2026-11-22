@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Predict performance - Early Warning{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Predict performance</h1>
+    <p>Run a quick screening without saving anything. Useful for what-if checks, for example how much better does attendance need to be.</p>
+  </div>
+</div>
+
+<form class="card form-card" method="post" action="{{ url_for('predict') }}" novalidate data-validate>
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  {% include "_student_fields.html" %}
+  <div class="form-actions">
+    <button class="btn btn-primary" type="submit">Predict risk level</button>
+    <a class="btn btn-ghost" href="{{ url_for('add_student') }}">Add as a student record instead</a>
+  </div>
+</form>
+{% endblock %}

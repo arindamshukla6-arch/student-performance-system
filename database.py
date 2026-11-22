@@ -138,7 +138,14 @@ def seed_demo_students(conn, predict_fn):
                 "previous_performance_pct": pct,
             }
             identity = {"student_id": row["student_id"], "name": row["name"]}
-            insert_student(conn, identity, clean, predict_fn(clean), is_demo=True)
+            if not student_exists(conn, identity["student_id"]):
+                insert_student(
+                    conn,
+                    identity,
+                    clean,
+                    predict_fn(clean),
+                    is_demo=True
+                )
             added += 1
     return added
 
